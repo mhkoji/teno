@@ -12,36 +12,24 @@
          (teno.server.html:page
           "/static/gen/index.bundle.css"
           "/static/gen/index.bundle.js"))))
-     #+ni
-     ("/memos/:memo-id"
-      (lambda (params req)
-        (declare (ignore req))
-        (let* ((memo-id
-                (teno.id:parse-short-or-nil
-                 (getf params :memo-id)))
-               (memo
-                (teno:load-memo-by-id db memo-id)))
-          (if memo
-              (html-response
-               (teno.server.html:memo
-                "/static/gen/memo.bundle.css"
-                "/static/gen/memo.bundle.js"
-                memo))
-              (html-response
-               (teno.server.html:not-found)
-               :status-code 404)))))
      ("/api/memos"
       (lambda (params req)
         (declare (ignore params req))
         (teno.db:with-connection (conn db)
-          (json-response (teno:load-memos conn)))))
-     (("/api/memos/_create" :method :post)
+          (json-response (teno.memo:load-head-text-memos conn)))))
+     (("/api/memos/_add" :method :post)
       (lambda (params req)
-        (declare (ignore params req))
+        (declare (ignore params))
         (teno.db:with-connection (conn db)
-          (let ((memo (teno:create-memo conn)))
+          (let ((memo
+                 (teno.memo:add-memo
+                  conn
+                  (cdr (assoc "text_string"
+                              (lack.request:request-body-parameters req)
+                              :test #'string=))
+                  teno.memo::+plain+)))
             (json-response
-             (teno:memo-id memo)))))))))
+             (teno.memo:memo-id memo)))))))))
 
 (defun make (db)
   (let ((mapper (myway:make-mapper)))

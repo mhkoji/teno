@@ -10,5 +10,6 @@ CREATE TABLE memos (
 CREATE TABLE memo_text (
   memo_id char(36) NOT NULL PRIMARY KEY,
   string text NOT NULL,
+  type varchar(36) NOT NULL,
   FOREIGN KEY (memo_id) REFERENCES memos(memo_id)
 ) engine=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;

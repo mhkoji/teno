@@ -15,12 +15,15 @@ function apiMemos() {
   });
 }
 
-function apiMemoCreate() {
-  return fetch('/api/memos/_create', {
+function apiMemoAdd(text_string) {
+  return fetch('/api/memos/_add', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
-    }
+    },
+    body: JSON.stringify({
+      'text_string': text_string
+    })
   }).then((resp) => resp.json()).then((body) => {
     return body.value;
   });
@@ -37,6 +40,11 @@ function MemoList(props) {
             {a.id}
           </td>
           <td>
+            <pre>
+              {a.text_string}
+            </pre>
+          </td>
+          <td>
             {a.created_on}
           </td>
         </tr>
@@ -47,6 +55,7 @@ function MemoList(props) {
         <thead>
           <tr>
             <th scope="col">Memo ID</th>
+            <th scope="col">Text</th>
             <th scope="col">Created on</th>
           </tr>
         </thead>
@@ -56,6 +65,7 @@ function MemoList(props) {
 }
 
 function App () {
+  const [textString, setTextString] = useState('');
   const [memosState, setMemosState] = useState([]);
   
   useEffect(() => {
@@ -63,7 +73,7 @@ function App () {
   }, []);
 
   function handleCreateMemoClick() {
-    apiMemoCreate().then(() => window.location.reload());
+    apiMemoAdd(textString).then(() => window.location.reload());
   }
     
   return (
@@ -71,6 +81,9 @@ function App () {
         <main className="p-md-5">
           <div className="container">
 
+            <textarea value={textString}
+                      onChange={(e) => setTextString(e.target.value)}>
+            </textarea>
             <button type="button"
                     className="btn btn-primary"
                     onClick={() => handleCreateMemoClick()} >

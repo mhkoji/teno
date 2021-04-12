@@ -194,6 +194,20 @@
 
 (defmethod teno.db.rdb:memo-text-update ((conn connection)
                                          (memo-id teno.id:id)
-                                         (string string))
-  (execute conn "UPDATE memo_text SET string = ? where memo_id = ?"
-           (list string (teno.id:to-string memo-id))))
+                                         (text teno.memo:text))
+  (execute
+   conn
+   "UPDATE memo_text SET type = ?, string = ? WHERE memo_id = ?"
+   (list (symbol-name (teno.memo:text-type text))
+         (teno.memo:text-string text)
+         (teno.id:to-string memo-id))))
+
+(defmethod teno.db.rdb:memo-text-head-string-select
+    ((conn connection)
+     (memo-id-list list))
+  (teno.db.rdb:select-from
+   conn
+   "memo_id, SUBSTRING(string, 1, 10)"
+   "memo_text"
+   :where `(:in "memo_id" (:p ,(mapcar #'teno.id:to-string
+                                       memo-id-list)))))

@@ -14,7 +14,8 @@
            :memo-text-select
            :memo-text-insert
            :memo-text-delete
-           :memo-text-update))
+           :memo-text-update
+           :memo-text-head-string-select))
 (in-package :teno.db.rdb)
 
 (defclass connection (teno.db:connection) ())
@@ -45,18 +46,20 @@
 
 (defgeneric memo-text-select (conn memo-id))
 
-(defgeneric memo-text-insert (conn node-id string))
+(defgeneric memo-text-insert (conn node-id text))
 
 (defgeneric memo-text-delete (conn memo-id-list))
 
-(defgeneric memo-text-update (conn memo-id string))
+(defgeneric memo-text-update (conn memo-id text))
+
+(defgeneric memo-text-head-string-select (conn memo-id-list))
 
 ;;;
 
 (defun parse-memo (conn row)
-  (teno:construct-memo
-   (teno.id:parse (first row))
-   (parse-timestamp conn (second row))))
+  (teno.memo:construct-memo
+   :id (teno.id:parse (first row))
+   :created-on (parse-timestamp conn (second row))))
 
 (defmethod memo-select-by-id ((conn connection) (memo-id teno.id:id))
   (single
@@ -65,29 +68,38 @@
     :where `(:= "memo_id" (:p ,(teno.id:to-string memo-id))))))
 
 
-(defmethod memo-insert ((conn connection) (memo teno:memo))
+(defmethod memo-insert ((conn connection)
+                        (memo teno.memo:memo))
   (insert-into conn "memos" '("memo_id" "created_on")
    (list (list
-          (teno.id:to-string (teno:memo-id memo))
-          (timestamp-to-string conn (teno:memo-created-on memo))))))
+          (teno.id:to-string (teno.memo:memo-id memo))
+          (timestamp-to-string conn (teno.memo:memo-created-on memo))))))
 
 (defmethod memo-delete ((conn connection) (memo-id-list list))
   (delete-from conn "memos"
    :where `(:in "memo_id" (:p ,(mapcar #'teno.id:to-string memo-id-list)))))
 
+
 (defmethod memo-text-select ((conn connection) (memo-id teno.id:id))
   (single
-   #'car
-   (select-from conn "string" "memo_text"
+   (lambda (row)
+     (teno.memo:make-text
+      :string (let ((octets (first row)))
+                (when octets
+                  (babel:octets-to-string octets)))
+      :type (teno.memo:parse-text-type (second row))))
+   (select-from conn "string, type" "memo_text"
     :where `(:= "memo_id" (:p ,(teno.id:to-string memo-id))))))
 
 (defmethod memo-text-insert ((conn connection)
                              (memo-id teno.id:id)
-                             (string string))
-  (insert-into conn "memo_text" '("memo_id" "string")
+                             (text teno.memo:text))
+  (insert-into conn "memo_text" '("memo_id" "string" "type")
    (list (list
           (teno.id:to-string memo-id)
-          string))))
+          (teno.memo:text-string text)
+          (symbol-name (teno.memo:text-type text))))))
+          
 
 (defmethod memo-text-delete ((conn connection) (memo-id-list list))
   (delete-from conn "memo_text"

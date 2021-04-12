@@ -7,10 +7,10 @@
    (:file "markdown")
 
    (:file "db")
-   (:file "teno")
+   (:file "memo")
 
    (:file "db/rdb")
-   (:file "db/rdb-teno")
+   (:file "db/rdb/memo")
    (:file "db/rdb/mysql")
 
    (:module :server
