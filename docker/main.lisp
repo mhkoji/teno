@@ -5,7 +5,7 @@
 (ql:quickload :teno)
 
 (defvar *locator*
-  (teno.db.mysql:make-locator
+  (teno.db.rdb.mysql:make-locator
    :user "root"
    :host "mysql"
    :port 3306))
@@ -18,14 +18,14 @@
 
    :static-root "/app/static/"
 
-   :db (make-instance 'teno.db.mysql:mysql
+   :db (make-instance 'teno.db.rdb.mysql:mysql
                       :db-name "teno"
                       :locator *locator*)
 
    :use-thread nil))
 
 (defun init ()
-  (teno.db.mysql:create-database
+  (teno.db.rdb.mysql:create-database
    "/root/quicklisp/local-projects/teno/mysql/"
    "teno"
    *locator*))

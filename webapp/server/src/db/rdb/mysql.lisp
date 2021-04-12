@@ -1,9 +1,9 @@
-(defpackage :teno.db.mysql
+(defpackage :teno.db.rdb.mysql
   (:use :cl)
   (:export :make-locator
            :mysql
            :create-database))
-(in-package :teno.db.mysql)
+(in-package :teno.db.rdb.mysql)
 
 (defstruct locator user host port)
 
@@ -184,16 +184,16 @@
 
 ;;;
                
-(defmethod teno.db:note-select ((conn connection))
+(defmethod teno.db.rdb:memo-select ((conn connection))
   (mapcar
    (alexandria:compose
-    (alexandria:curry #'teno.db.rdb::parse-note conn)
+    (alexandria:curry #'teno.db.rdb::parse-memo conn)
     (lambda (plist)
       (mapcar #'cdr (alexandria:plist-alist plist))))
-   (execute conn "SELECT note_id, created_on FROM notes LIMIT 0, 50" nil)))
+   (execute conn "SELECT memo_id, created_on FROM memos LIMIT 0, 50" nil)))
 
-(defmethod teno.db:note-text-update ((conn connection)
-                                     (note-id teno.id:id)
-                                     (string string))
-  (execute conn "UPDATE note_text SET string = ? where note_id = ?"
-           (list string (teno.id:to-string note-id))))
+(defmethod teno.db.rdb:memo-text-update ((conn connection)
+                                         (memo-id teno.id:id)
+                                         (string string))
+  (execute conn "UPDATE memo_text SET string = ? where memo_id = ?"
+           (list string (teno.id:to-string memo-id))))

@@ -4,8 +4,8 @@ import Modal from 'react-modal';
 import ReactDOM from 'react-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-function apiNotes() {
-  return fetch('/api/notes', {
+function apiMemos() {
+  return fetch('/api/memos', {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json'
@@ -15,8 +15,8 @@ function apiNotes() {
   });
 }
 
-function apiNoteCreate() {
-  return fetch('/api/notes/_create', {
+function apiMemoCreate() {
+  return fetch('/api/memos/_create', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
@@ -28,9 +28,9 @@ function apiNoteCreate() {
 
 ///
 
-function NoteList(props) {
-  const { notes } = props;
-  const rows = notes.map((a) => {
+function MemoList(props) {
+  const { memos } = props;
+  const rows = memos.map((a) => {
     return (
         <tr key={a.id}>
           <td>
@@ -46,7 +46,7 @@ function NoteList(props) {
       <table className="table table-striped">
         <thead>
           <tr>
-            <th scope="col">Note ID</th>
+            <th scope="col">Memo ID</th>
             <th scope="col">Created on</th>
           </tr>
         </thead>
@@ -56,14 +56,14 @@ function NoteList(props) {
 }
 
 function App () {
-  const [notesState, setNotesState] = useState([]);
+  const [memosState, setMemosState] = useState([]);
   
   useEffect(() => {
-    apiNotes().then((notes) =>  setNotesState(notes));
+    apiMemos().then((memos) =>  setMemosState(memos));
   }, []);
 
-  function handleCreateNoteClick() {
-    apiNoteCreate().then(() => window.location.reload());
+  function handleCreateMemoClick() {
+    apiMemoCreate().then(() => window.location.reload());
   }
     
   return (
@@ -73,11 +73,11 @@ function App () {
 
             <button type="button"
                     className="btn btn-primary"
-                    onClick={() => handleCreateNoteClick()} >
-              Create Note
+                    onClick={() => handleCreateMemoClick()} >
+              Create Memo
             </button>
 
-            <NoteList notes={notesState} />
+            <MemoList memos={memosState} />
           </div>
         </main>
       </div>

@@ -9,37 +9,39 @@
       (lambda (params req)
         (declare (ignore params req))
         (html-response
-         (teno.server.page:page
+         (teno.server.html:page
           "/static/gen/index.bundle.css"
           "/static/gen/index.bundle.js"))))
      #+ni
-     ("/notes/:note-id"
+     ("/memos/:memo-id"
       (lambda (params req)
         (declare (ignore req))
-        (let* ((note-id
+        (let* ((memo-id
                 (teno.id:parse-short-or-nil
-                 (getf params :note-id)))
-               (note
-                (teno:load-note-by-id db note-id)))
-          (if note
+                 (getf params :memo-id)))
+               (memo
+                (teno:load-memo-by-id db memo-id)))
+          (if memo
               (html-response
-               (teno.server.page:note
-                "/static/gen/note.bundle.css"
-                "/static/gen/note.bundle.js"
-                note))
+               (teno.server.html:memo
+                "/static/gen/memo.bundle.css"
+                "/static/gen/memo.bundle.js"
+                memo))
               (html-response
-               (teno.server.page:not-found)
+               (teno.server.html:not-found)
                :status-code 404)))))
-     ("/api/notes"
+     ("/api/memos"
       (lambda (params req)
         (declare (ignore params req))
-        (json-response (teno:load-notes db))))
-     (("/api/notes/_create" :method :post)
+        (teno.db:with-connection (conn db)
+          (json-response (teno:load-memos conn)))))
+     (("/api/memos/_create" :method :post)
       (lambda (params req)
         (declare (ignore params req))
-        (let ((note (teno:create-note db)))
-          (json-response
-           (teno:note-id note))))))))
+        (teno.db:with-connection (conn db)
+          (let ((memo (teno:create-memo conn)))
+            (json-response
+             (teno:memo-id memo)))))))))
 
 (defun make (db)
   (let ((mapper (myway:make-mapper)))

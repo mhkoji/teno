@@ -6,17 +6,17 @@
   ((:file "id")
    (:file "markdown")
 
-   (:file "teno")
    (:file "db")
-   (:file "persistent")
+   (:file "teno")
 
    (:file "db/rdb")
-   (:file "db/mysql")
+   (:file "db/rdb-teno")
+   (:file "db/rdb/mysql")
 
    (:module :server
     :pathname "server"
     :components
-    ((:file "page")
+    ((:file "html")
      (:file "clack/util")
      (:file "clack/middleware")
      (:file "jsown")

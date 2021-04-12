@@ -1,9 +1,9 @@
-(defpackage :teno.server.page
+(defpackage :teno.server.html
   (:use :cl)
   (:export :page
-           :note
+           :memo
            :not-found))
-(in-package :teno.server.page)
+(in-package :teno.server.html)
 
 (defun page (css-path js-path)
   (cl-who:with-html-output-to-string (s nil :prologue t)
@@ -18,7 +18,7 @@
      (:script :type "text/javascript"
               :src (cl-who:str js-path))))))
 
-(defun note (css-path js-path note)
+(defun memo (css-path js-path memo)
   (cl-who:with-html-output-to-string (s nil :prologue t)
     (:head
      (:meta :charset "utf-8")
@@ -32,7 +32,7 @@
         (format nil "window['$teno'] = ~A;"
          (jsown:to-json
           (jsown:new-js
-            ("note" note)))))))
+            ("memo" memo)))))))
      (:div :id "app")
      (:div :id "app-modal")
      (:script :type "text/javascript"

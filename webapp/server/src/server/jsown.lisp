@@ -10,8 +10,8 @@
   (jsown:to-json
    (local-time:to-rfc3339-timestring o)))
 
-(defmethod jsown:to-json ((o teno:note))
+(defmethod jsown:to-json ((o teno:memo))
   (jsown:to-json
    (jsown:new-js
-     ("id" (teno:note-id o))
-     ("created_on" (teno:note-created-on o)))))
+     ("id" (teno:memo-id o))
+     ("created_on" (teno:memo-created-on o)))))

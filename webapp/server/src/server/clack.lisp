@@ -6,9 +6,9 @@
 (defun system-relative-pathname (name)
   (asdf:system-relative-pathname (asdf:find-system :teno) name))
 
-(defvar *db* (make-instance 'teno.db.mysql:mysql
+(defvar *db* (make-instance 'teno.db.rdb.mysql:mysql
               :db-name "teno"
-              :locator (teno.db.mysql:make-locator
+              :locator (teno.db.rdb.mysql:make-locator
                         :user "root"
                         :host "127.0.0.1"
                         :port 3306)))

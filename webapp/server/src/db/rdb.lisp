@@ -5,7 +5,16 @@
            :select-from
            :delete-from
            :timestamp-to-string
-           :parse-timestamp))
+           :parse-timestamp
+   
+           :memo-select-by-id
+           :memo-select
+           :memo-insert
+           :memo-delete
+           :memo-text-select
+           :memo-text-insert
+           :memo-text-delete
+           :memo-text-update))
 (in-package :teno.db.rdb)
 
 (defclass connection (teno.db:connection) ())
@@ -25,47 +34,61 @@
 
 ;;;
 
-(defun parse-note (conn row)
-  (teno:construct-note
+(defgeneric memo-select-by-id (conn node-id))
+
+(defgeneric memo-select (conn))
+
+(defgeneric memo-insert (conn memo))
+
+(defgeneric memo-delete (conn memo-id-list))
+
+
+(defgeneric memo-text-select (conn memo-id))
+
+(defgeneric memo-text-insert (conn node-id string))
+
+(defgeneric memo-text-delete (conn memo-id-list))
+
+(defgeneric memo-text-update (conn memo-id string))
+
+;;;
+
+(defun parse-memo (conn row)
+  (teno:construct-memo
    (teno.id:parse (first row))
    (parse-timestamp conn (second row))))
 
-(defmethod teno.db:note-select-by-id ((conn connection)
-                                      (note-id teno.id:id))
+(defmethod memo-select-by-id ((conn connection) (memo-id teno.id:id))
   (single
-   (alexandria:curry #'parse-note conn)
-   (select-from conn "note_id, created_on" "notes"
-    :where `(:= "note_id" (:p ,(teno.id:to-string note-id))))))
+   (alexandria:curry #'parse-memo conn)
+   (select-from conn "memo_id, created_on" "memos"
+    :where `(:= "memo_id" (:p ,(teno.id:to-string memo-id))))))
 
 
-(defmethod teno.db:note-insert ((conn connection)
-                                (note teno:note))
-  (insert-into conn "notes" '("note_id" "created_on")
+(defmethod memo-insert ((conn connection) (memo teno:memo))
+  (insert-into conn "memos" '("memo_id" "created_on")
    (list (list
-          (teno.id:to-string (teno:note-id note))
-          (timestamp-to-string conn (teno:note-created-on note))))))
+          (teno.id:to-string (teno:memo-id memo))
+          (timestamp-to-string conn (teno:memo-created-on memo))))))
 
-(defmethod teno.db:note-delete ((conn connection)
-                                (note-id-list list))
-  (delete-from conn "notes"
-   :where `(:in "note_id" (:p ,(mapcar #'teno.id:to-string note-id-list)))))
+(defmethod memo-delete ((conn connection) (memo-id-list list))
+  (delete-from conn "memos"
+   :where `(:in "memo_id" (:p ,(mapcar #'teno.id:to-string memo-id-list)))))
 
-(defmethod teno.db:note-text-select ((conn connection)
-                                     (note-id teno.id:id))
+(defmethod memo-text-select ((conn connection) (memo-id teno.id:id))
   (single
    #'car
-   (select-from conn "string" "note_text"
-    :where `(:= "note_id" (:p ,(teno.id:to-string note-id))))))
+   (select-from conn "string" "memo_text"
+    :where `(:= "memo_id" (:p ,(teno.id:to-string memo-id))))))
 
-(defmethod teno.db:note-text-insert ((conn connection)
-                                     (note-id teno.id:id)
-                                     (string string))
-  (insert-into conn "note_text" '("note_id" "string")
+(defmethod memo-text-insert ((conn connection)
+                             (memo-id teno.id:id)
+                             (string string))
+  (insert-into conn "memo_text" '("memo_id" "string")
    (list (list
-          (teno.id:to-string note-id)
+          (teno.id:to-string memo-id)
           string))))
 
-(defmethod teno.db:note-text-delete ((conn connection)
-                                     (note-id-list list))
-  (delete-from conn "note_text"
-   :where `(:in "note_id" (:p ,(mapcar #'teno.id:to-string note-id-list)))))
+(defmethod memo-text-delete ((conn connection) (memo-id-list list))
+  (delete-from conn "memo_text"
+   :where `(:in "memo_id" (:p ,(mapcar #'teno.id:to-string memo-id-list)))))
