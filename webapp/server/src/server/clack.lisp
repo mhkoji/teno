@@ -20,7 +20,7 @@
 
 ;;;
 
-(defun start (&key (port 5001)
+(defun start (&key (port 6000)
                    (static-root *static-root*)
                    (db *db*)
                    (use-thread t))
@@ -36,8 +36,7 @@
           (lambda (env)
             (declare (ignore env))
             '(302 (:location "/") nil)))
-         ;; hunchentoot accepts nil as address, which means the server accepts connections from all IP addresses.
-         :address nil
+         :address "0.0.0.0"
 	 ;; Don't have to invoke a debugger. No one can take care of it.
 	 ;; setq after clackup because clackup set the var to T.
 	 :debug nil

@@ -14,8 +14,6 @@
 
 (defun clack ()
   (teno.server.clack:start
-   :port 5000
-
    :static-root "/app/static/"
 
    :db (make-instance 'teno.db.rdb.mysql:mysql
