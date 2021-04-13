@@ -23,21 +23,26 @@
     (memo-text-delete conn id-list)
     (memo-delete conn id-list)))
 
-(defmethod teno.memo:load-memo-text-by-id ((conn connection)
-                                           (memo-id teno.id:id))
-  (memo-text-select conn memo-id))
-
-(defmethod teno.memo:load-memo-head-text-strings-by-ids ((conn connection)
-                                                         (ids list))
-  (let ((id->string (make-hash-table :test #'equal)))
-    (loop for (id-string text-string)
-               in (memo-text-head-string-select conn ids)
-          do (setf (gethash id-string id->string) text-string))
-    (mapcar (lambda (id)
-              (gethash (teno.id:to-string id) id->string))
-            ids)))
+(defmethod teno.memo:memo-text ((conn connection)
+                                (memo teno.memo:memo))
+  (memo-text-select conn (teno.memo:memo-id memo)))
 
 (defmethod teno.memo:update-memo-text ((conn connection)
                                        (memo teno.memo:memo)
                                        (text teno.memo:text))
   (memo-text-update conn (teno.memo:memo-id memo) text))
+
+(defmethod teno.memo:load-head-text-memos ((conn connection))
+  (let ((memos (teno.memo:load-memos conn)))
+    (when memos
+      (let ((ids (mapcar #'teno.memo:memo-id memos))
+            (id->string (make-hash-table :test #'equal)))
+        (loop for (id-string text-string) in (memo-text-head-string-select
+                                              conn ids)
+              do (setf (gethash id-string id->string) text-string))
+        (mapcar (lambda (memo)
+                  (let ((id-string (teno.id:to-string
+                                    (teno.memo:memo-id memo))))
+                    (change-class memo 'teno.memo:head-text-memo
+                                  :string (gethash id-string id->string))))
+                memos)))))

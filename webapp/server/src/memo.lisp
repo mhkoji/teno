@@ -20,12 +20,11 @@
            :delete-memo
            :load-memo-by-id
            :load-memos
-           :load-memo-text-by-id
-           :load-memo-head-text-strings-by-ids
+           :update-memo-text
+
            :load-head-text-memos
            :head-text-memo
-           :head-text-memo-string
-           :update-memo-text))
+           :head-text-memo-string))
 (in-package :teno.memo)
 
 (defvar +plain+ :plain)
@@ -71,9 +70,7 @@
 (defgeneric delete-memo (conn memo-id))
 
 
-(defgeneric load-memo-text-by-id (conn memo-id))
-
-(defgeneric load-memo-head-text-strings-by-ids (conn memo-ids))
+(defgeneric memo-text (conn memo))
 
 (defgeneric update-memo-text (conn memo text))
 
@@ -90,22 +87,11 @@
     (update-memo-text conn memo text)
     memo))
 
-(defun memo-text (conn memo)
-  (load-memo-text-by-id conn (memo-id memo)))
-
+;;;
 
 (defclass head-text-memo (memo)
   ((string
     :initarg :string
     :reader head-text-memo-string)))
-    
-(defun load-head-text-memos (conn)
-  (let ((memos (load-memos conn)))
-    (when memos
-      (let ((strings (load-memo-head-text-strings-by-ids
-                      conn
-                      (mapcar #'memo-id memos))))
-        (mapcar (lambda (memo string)
-                  (change-class memo 'head-text-memo
-                                :string string))
-                memos strings)))))
+
+(defgeneric load-head-text-memos (conn))
