@@ -24,7 +24,9 @@
 
            :load-head-text-memos
            :head-text-memo
-           :head-text-memo-string))
+           :head-text-memo-string
+
+           :group-by-created-on))
 (in-package :teno.memo)
 
 (defvar +plain+ :plain)
@@ -95,3 +97,19 @@
     :reader head-text-memo-string)))
 
 (defgeneric load-head-text-memos (conn))
+
+
+(defun group-by-created-on (memos)
+  (labels ((universal-of-clock-today (ts)
+             (local-time:timestamp-to-universal
+              (local-time:clock-today ts))))
+    (let ((universal-list nil)
+          (universal->memos (make-hash-table :test #'equal)))
+      (dolist (memo memos)
+        (let ((u (universal-of-clock-today (memo-created-on memo))))
+          (push memo (gethash u universal->memos))
+          (pushnew u universal-list :test #'=)))
+      (mapcar (lambda (u)
+                (cons (local-time:universal-to-timestamp u)
+                      (nreverse (gethash u universal->memos))))
+              universal-list))))

@@ -16,20 +16,21 @@
       (lambda (params req)
         (declare (ignore params req))
         (teno.db:with-connection (conn db)
-          (json-response (teno.memo:load-head-text-memos conn)))))
+          (json-response
+           (teno.memo:group-by-created-on
+            (teno.memo:load-head-text-memos conn))))))
      (("/api/memos/_add" :method :post)
       (lambda (params req)
         (declare (ignore params))
         (teno.db:with-connection (conn db)
-          (let ((memo
-                 (teno.memo:add-memo
-                  conn
-                  (cdr (assoc "text_string"
-                              (lack.request:request-body-parameters req)
-                              :test #'string=))
-                  teno.memo::+plain+)))
-            (json-response
-             (teno.memo:memo-id memo)))))))))
+          (json-response
+           (teno.memo:memo-id
+            (teno.memo:add-memo
+             conn
+             (cdr (assoc "text_string"
+                         (lack.request:request-body-parameters req)
+                         :test #'string=))
+             teno.memo::+plain+)))))))))
 
 (defun make (db)
   (let ((mapper (myway:make-mapper)))

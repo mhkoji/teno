@@ -33,22 +33,37 @@ function apiMemoAdd(text_string) {
 
 function MemoList(props) {
   const { memos } = props;
-  const rows = memos.map((a) => {
-    return (
-        <tr key={a.id}>
-          <td>
-            {a.id}
-          </td>
-          <td>
-            <pre>
-              {a.text_string}
-            </pre>
-          </td>
-          <td>
-            {a.created_on}
-          </td>
-        </tr>
-    );
+  const rows = []
+  memos.forEach((ts_memos) => {
+    const ts = ts_memos[0];
+    rows.push((
+      <tr key={ts}>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+          {ts}
+        </td>
+      </tr>
+    ));
+    ts_memos.slice(1).forEach((a) => {
+        rows.push((
+          <tr key={a.id}>
+            <td>
+              {a.id}
+            </td>
+            <td>
+              <pre>
+                {a.text_string}
+              </pre>
+            </td>
+            <td>
+              {a.created_on}
+            </td>
+          </tr>
+        ));
+    });
   });
   return (
       <table className="table table-striped">
