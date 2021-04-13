@@ -202,12 +202,17 @@
          (teno.memo:text-string text)
          (teno.id:to-string memo-id))))
 
-(defmethod teno.db.rdb:memo-text-head-string-select
+(defmethod teno.db.rdb:memo-text-string-select
     ((conn connection)
      (memo-id-list list))
-  (teno.db.rdb:select-from
-   conn
-   "memo_id, SUBSTRING(string, 1, 10)"
-   "memo_text"
-   :where `(:in "memo_id" (:p ,(mapcar #'teno.id:to-string
-                                       memo-id-list)))))
+  (let ((rows (teno.db.rdb:select-from
+               conn
+               "memo_id, string"
+               "memo_text"
+               :where `(:in "memo_id" (:p ,(mapcar #'teno.id:to-string
+                                                   memo-id-list))))))
+    (dolist (r rows)
+      (setf (second r) (if (second r)
+                           (babel:octets-to-string (second r))
+                           "")))
+    rows))

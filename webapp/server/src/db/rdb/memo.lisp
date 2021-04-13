@@ -37,9 +37,11 @@
     (when memos
       (let ((ids (mapcar #'teno.memo:memo-id memos))
             (id->string (make-hash-table :test #'equal)))
-        (loop for (id-string text-string) in (memo-text-head-string-select
+        (loop for (id-string text-string) in (memo-text-string-select
                                               conn ids)
-              do (setf (gethash id-string id->string) text-string))
+              do (let ((len (length text-string)))
+                   (setf (gethash id-string id->string)
+                         (subseq text-string 0 (min len 10)))))
         (mapcar (lambda (memo)
                   (let ((id-string (teno.id:to-string
                                     (teno.memo:memo-id memo))))

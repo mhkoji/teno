@@ -15,7 +15,7 @@
            :memo-text-insert
            :memo-text-delete
            :memo-text-update
-           :memo-text-head-string-select))
+           :memo-text-string-select))
 (in-package :teno.db.rdb)
 
 (defclass connection (teno.db:connection) ())
@@ -52,7 +52,7 @@
 
 (defgeneric memo-text-update (conn memo-id text))
 
-(defgeneric memo-text-head-string-select (conn memo-id-list))
+(defgeneric memo-text-string-select (conn memo-id-list))
 
 ;;;
 
