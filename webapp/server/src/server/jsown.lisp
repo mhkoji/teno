@@ -16,6 +16,18 @@
      ("id" (teno.memo:memo-id o))
      ("created_on" (teno.memo:memo-created-on o)))))
 
+(defmethod jsown:to-json ((o teno.memo:text))
+  (jsown:to-json
+   (jsown:new-js
+     ("type" (teno.memo:text-type o))
+     ("string" (teno.memo:text-string o)))))
+
+(defmethod jsown:to-json ((o teno.memo:detail))
+  (jsown:to-json
+   (jsown:new-js
+     ("text" (teno.memo:detail-text o))
+     ("created_on" (teno.memo:detail-created-on o)))))
+
 (defmethod jsown:to-json ((o teno.memo:head-text-memo))
   (jsown:to-json
    (jsown:new-js

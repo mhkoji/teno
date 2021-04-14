@@ -22,6 +22,11 @@
            :load-memos
            :update-memo-text
 
+           :detail
+           :memo-detail
+           :detail-text
+           :detail-created-on
+           
            :load-head-text-memos
            :head-text-memo
            :head-text-memo-string
@@ -88,6 +93,16 @@
         (text (construct-text :type type :string string)))
     (update-memo-text conn memo text)
     memo))
+
+(defstruct detail text created-on)
+
+(defun memo-detail (conn memo-id)
+  (let ((memo (load-memo-by-id conn memo-id)))
+    (when memo
+      (make-detail
+       :text (memo-text conn memo)
+       :created-on (memo-created-on memo)))))
+  
 
 ;;;
 

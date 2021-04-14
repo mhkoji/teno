@@ -15,6 +15,18 @@ function apiMemos() {
   });
 }
 
+function apiMemoDetail(memoId) {
+  return fetch('/api/memos/' + memoId, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  }).then((resp) => resp.json()).then((body) => {
+    return body.value;
+  });
+}
+
+
 function apiMemoAdd(text_string) {
   return fetch('/api/memos/_add', {
     method: 'POST',
@@ -31,8 +43,31 @@ function apiMemoAdd(text_string) {
 
 ///
 
+function MemoDetail(props) {
+  const { memoId } = props;
+  const [detail, setDetail] = useState(null);
+
+    
+  useEffect(() => {
+    apiMemoDetail(memoId).then(setDetail);
+  }, []);
+
+  if (detail === null) {
+    return (<div>Loading ...</div>);
+  }
+
+  return (
+    <div>
+      <div>
+        created on: {detail.created_on}
+      </div>
+      <pre>{detail.text.string}</pre>
+    </div>
+  );
+}
+
 function MemoList(props) {
-  const { memos } = props;
+  const { memos, onClickMemo } = props;
   const rows = []
   memos.forEach((ts_memos) => {
     const ts = ts_memos[0];
@@ -51,7 +86,11 @@ function MemoList(props) {
         rows.push((
           <tr key={a.id}>
             <td>
-              {a.id}
+              <button type="button"
+                      className="btn btn-info"
+                      onClick={() => onClickMemo(a.id)}>
+                {a.id}
+              </button>
             </td>
             <td>
               <pre>
@@ -82,15 +121,16 @@ function MemoList(props) {
 function App () {
   const [textString, setTextString] = useState('');
   const [memosState, setMemosState] = useState([]);
+  const [detailedMemoId, setDetailedMemoId] = useState(null);
   
   useEffect(() => {
     apiMemos().then((memos) =>  setMemosState(memos));
   }, []);
 
-  function handleCreateMemoClick() {
+  function handleClickCreateMemo() {
     apiMemoAdd(textString).then(() => window.location.reload());
   }
-    
+
   return (
       <div>
         <main className="p-md-5">
@@ -101,13 +141,25 @@ function App () {
             </textarea>
             <button type="button"
                     className="btn btn-primary"
-                    onClick={() => handleCreateMemoClick()} >
+                    onClick={handleClickCreateMemo} >
               Create Memo
             </button>
 
-            <MemoList memos={memosState} />
+            <MemoList
+              memos={memosState}
+              onClickMemo={(memoId) => setDetailedMemoId(memoId)} />
           </div>
         </main>
+        
+        {
+          detailedMemoId && (
+            <Modal
+              isOpen={true}
+              onRequestClose={() => setDetailedMemoId(null)} >
+              <MemoDetail memoId={detailedMemoId} />
+            </Modal>
+          )
+        }
       </div>
   );
 }

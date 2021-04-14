@@ -19,6 +19,14 @@
           (json-response
            (teno.memo:group-by-created-on
             (teno.memo:load-head-text-memos conn))))))
+     (("/api/memos/:memo-id")
+      (lambda (params req)
+        (declare (ignore req))
+        (teno.db:with-connection (conn db)
+          (json-response
+           (teno.memo:memo-detail
+            conn
+            (teno.id:parse-short (getf params :memo-id)))))))
      (("/api/memos/_add" :method :post)
       (lambda (params req)
         (declare (ignore params))
