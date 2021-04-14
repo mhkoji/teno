@@ -18,7 +18,7 @@ module.exports = {
   },
 
   output: {
-    path: path.resolve(__dirname, '../static/gen'),
+    path: path.resolve(__dirname, '../server/static/gen'),
     filename: '[name].bundle.js'
   },
 

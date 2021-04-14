@@ -14,7 +14,7 @@
                         :port 3306)))
 
 (defvar *static-root*
-  (system-relative-pathname "../static/"))
+  (system-relative-pathname "./static/"))
 
 (defvar *handler* nil)
 

@@ -1,6 +1,6 @@
 FROM node:12.18.3-stretch AS static_builder
 
-RUN mkdir /static
+RUN mkdir /server
 
 WORKDIR /build
 
@@ -39,7 +39,7 @@ RUN sbcl --noinform \
          --load "/build/requirements.lisp"
 
 
-COPY --from=static_builder /static /app/static
+COPY --from=static_builder /server/static /app/static
 
 COPY . /root/quicklisp/local-projects/teno
 RUN sbcl --noinform \
