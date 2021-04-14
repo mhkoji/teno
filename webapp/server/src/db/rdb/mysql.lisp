@@ -190,7 +190,9 @@
     (alexandria:curry #'teno.db.rdb::parse-memo conn)
     (lambda (plist)
       (mapcar #'cdr (alexandria:plist-alist plist))))
-   (execute conn "SELECT memo_id, created_on FROM memos LIMIT 0, 50" nil)))
+   (execute conn
+            "SELECT memo_id, created_on FROM memos ORDER BY created_on DESC LIMIT 0, 50"
+            nil)))
 
 (defmethod teno.db.rdb:memo-text-update ((conn connection)
                                          (memo-id teno.id:id)
