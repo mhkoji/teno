@@ -122,14 +122,19 @@ function App () {
   const [textString, setTextString] = useState('');
   const [memosState, setMemosState] = useState([]);
   const [detailedMemoId, setDetailedMemoId] = useState(null);
-  
-  useEffect(() => {
+
+  function refreshMemos() {
     apiMemos().then((memos) =>  setMemosState(memos));
-  }, []);
+  }
 
   function handleClickCreateMemo() {
-    apiMemoAdd(textString).then(() => window.location.reload());
+    apiMemoAdd(textString).then(() => {
+      setTextString('');
+      refreshMemos();
+    });
   }
+
+  useEffect(() =>  refreshMemos(), []);
 
   return (
       <div>
