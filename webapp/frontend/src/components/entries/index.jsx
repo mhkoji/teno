@@ -4,6 +4,8 @@ import Modal from 'react-modal';
 import ReactDOM from 'react-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
+import { Plus, Asterisk } from '../fa'
+
 function apiMemos() {
   return fetch('/api/memos', {
     method: 'GET',
@@ -58,9 +60,10 @@ function MemoDetail(props) {
 
   return (
     <div>
-      <div>
-        created on: {detail.created_on}
-      </div>
+      <ul>
+        <li>ID: {memoId}</li>
+        <li>Created on: {detail.created_on}</li>
+      </ul>
       <pre>{detail.text.string}</pre>
     </div>
   );
@@ -76,9 +79,9 @@ function MemoList(props) {
         <td>
         </td>
         <td>
+          {ts}
         </td>
         <td>
-          {ts}
         </td>
       </tr>
     ));
@@ -86,19 +89,20 @@ function MemoList(props) {
         rows.push((
           <tr key={a.id}>
             <td>
-              <button type="button"
-                      className="btn btn-info"
-                      onClick={() => onClickMemo(a.id)}>
-                {a.id}
-              </button>
-            </td>
-            <td>
               <pre>
                 {a.text_string}
               </pre>
             </td>
             <td>
               {a.created_on}
+            </td>
+            <td>
+              <button type="button"
+                      className="btn btn-info"
+                      aria-label="View detail"
+                      onClick={() => onClickMemo(a.id)}>
+                <Asterisk />
+              </button>
             </td>
           </tr>
         ));
@@ -108,9 +112,9 @@ function MemoList(props) {
       <table className="table table-striped">
         <thead>
           <tr>
-            <th scope="col">Memo ID</th>
             <th scope="col">Text</th>
             <th scope="col">Created on</th>
+            <th scope="col"></th>
           </tr>
         </thead>
         <tbody>{rows}</tbody>
@@ -144,11 +148,14 @@ function App () {
             <textarea value={textString}
                       onChange={(e) => setTextString(e.target.value)}>
             </textarea>
-            <button type="button"
-                    className="btn btn-primary"
-                    onClick={handleClickCreateMemo} >
-              Create Memo
-            </button>
+            <div>
+              <button type="button"
+                      className="btn btn-primary"
+                      aria-label="Add memo"
+                      onClick={handleClickCreateMemo} >
+                <Plus />
+              </button>
+            </div>
 
             <MemoList
               memos={memosState}

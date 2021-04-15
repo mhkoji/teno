@@ -4,5 +4,10 @@ import '@fortawesome/fontawesome-free/js/solid.min';
 import '@fortawesome/fontawesome-free/js/regular';
 
 export function Plus() {
-  return <i className="fas fa-plus" />;
+  return <i className="fas fa-plus" aria-hidden="true"/>;
+}
+
+
+export function Asterisk() {
+  return <i className="fa fa-asterisk" aria-hidden="true"/>;
 }
