@@ -115,16 +115,19 @@
 
 
 (defun group-by-created-on (memos)
-  (labels ((universal-of-clock-today (ts)
-             (local-time:timestamp-to-universal
-              (local-time:clock-today ts))))
+  (labels ((to-date (ts)
+             (let ((clone (local-time:clone-timestamp ts)))
+               (setf (local-time:sec-of clone) 0)
+               (setf (local-time:nsec-of clone) 0)
+               clone)))
     (let ((universal-list nil)
           (universal->memos (make-hash-table :test #'equal)))
       (dolist (memo memos)
-        (let ((u (universal-of-clock-today (memo-created-on memo))))
+        (let ((u (local-time:timestamp-to-universal
+                  (to-date (memo-created-on memo)))))
           (push memo (gethash u universal->memos))
           (pushnew u universal-list :test #'=)))
       (mapcar (lambda (u)
                 (cons (local-time:universal-to-timestamp u)
-                      (nreverse (gethash u universal->memos))))
-              universal-list))))
+                      (gethash u universal->memos)))
+              (nreverse universal-list)))))
