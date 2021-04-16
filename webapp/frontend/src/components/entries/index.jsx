@@ -134,13 +134,12 @@ function App () {
 
   function handleClickCreateMemo() {
     apiMemoAdd(textString).then(() => {
-      setTextString('');
+      handleChangeTextArea('');
       refreshMemos();
     });
   }
 
-  function handleChangeTextArea(e) {
-    const text = e.target.value;
+  function handleChangeTextArea(text) {
     setTextString(text);
     setButtonEnabled(text !== '');
   }
@@ -153,7 +152,7 @@ function App () {
           <div className="container">
 
             <textarea value={textString}
-                      onChange={handleChangeTextArea}>
+                      onChange={(e) => handleChangeTextArea(e.target.value)}>
             </textarea>
             <div>
               <button type="button"
