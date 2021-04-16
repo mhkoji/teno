@@ -126,6 +126,7 @@ function App () {
   const [textString, setTextString] = useState('');
   const [memosState, setMemosState] = useState([]);
   const [detailedMemoId, setDetailedMemoId] = useState(null);
+  const [buttonEnabled, setButtonEnabled] = useState(false);
 
   function refreshMemos() {
     apiMemos().then((memos) =>  setMemosState(memos));
@@ -138,6 +139,12 @@ function App () {
     });
   }
 
+  function handleChangeTextArea(e) {
+    const text = e.target.value;
+    setTextString(text);
+    setButtonEnabled(text !== '');
+  }
+
   useEffect(() =>  refreshMemos(), []);
 
   return (
@@ -146,12 +153,13 @@ function App () {
           <div className="container">
 
             <textarea value={textString}
-                      onChange={(e) => setTextString(e.target.value)}>
+                      onChange={handleChangeTextArea}>
             </textarea>
             <div>
               <button type="button"
                       className="btn btn-primary"
                       aria-label="Add memo"
+                      disabled={!buttonEnabled}
                       onClick={handleClickCreateMemo} >
                 <Plus />
               </button>
