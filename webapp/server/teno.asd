@@ -25,10 +25,9 @@
   :depends-on
   (:alexandria
    :cl-base64
-   :cl-dbi
    :cl-markdown
-   :cl-mysql
    :local-time
+   :myqlo
    :uuid
 
    :clack

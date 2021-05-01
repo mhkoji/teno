@@ -7,13 +7,6 @@
 
 (defstruct locator user host port)
 
-(progn
-  (remhash :timestamp cl-mysql:*type-map*)
-  (remhash :date      cl-mysql:*type-map*)
-  (remhash :time      cl-mysql:*type-map*)
-  (remhash :datetime  cl-mysql:*type-map*)
-  (remhash :newdate   cl-mysql:*type-map*))
-
 (defclass mysql (teno.db:db)
   ((db-name
     :initarg :db-name
@@ -30,19 +23,24 @@
 (defmethod teno.db:call-with-connection ((db mysql) fn)
   (let ((db-name (mysql-db-name db))
         (locator (mysql-locator db)))
-    (let ((conn-impl (cl-dbi:connect
-                      :mysql
-                      :database-name db-name
-                      :username (locator-user locator)
-                      :host (locator-host locator)
-                      :port (locator-port locator))))
+    (let ((conn-impl (myqlo:connect
+                      (locator-host locator)
+                      (locator-user locator)
+                      nil
+                      db-name
+                      (locator-port locator)
+                      nil)))
       (unwind-protect
            (funcall fn (make-instance 'connection :impl conn-impl))
-        (cl-dbi:disconnect conn-impl)))))
+        (myqlo:disconnect conn-impl)))))
 
 (defun execute (conn query args)
-  (let ((q (cl-dbi:prepare (connection-impl conn)  query)))
-    (dbi:fetch-all (dbi:execute q args))))
+  (let ((params (mapcar (lambda (v)
+                          (myqlo:make-param
+                           :sql-type :string
+                           :value (format nil "~A" v)))
+                        args)))
+    (myqlo:execute (connection-impl conn) query params)))
 
 (defun to-mysql-timestamp-string (timestamp)
   (local-time:format-timestring nil timestamp
@@ -160,10 +158,7 @@
                                          order-by)
   (destructuring-bind (query-string args)
       (convert-select-query column-names table-name where order-by)
-    (let ((plists (execute conn query-string args)))
-      (mapcar (lambda (plist)
-                (mapcar #'cdr (alexandria:plist-alist plist)))
-              plists))))
+    (execute conn query-string args)))
 
 ;;;
 
@@ -171,7 +166,7 @@
   (teno.db:with-connection (conn (make-instance 'mysql
                                   :db-name nil
                                   :locator locator))
-    (cl-dbi:do-sql (connection-impl conn)
+    (myqlo:query (connection-impl conn)
       (format nil "CREATE DATABASE IF NOT EXISTS ~A" db-name)))
   (teno.db:with-connection (conn (make-instance 'mysql
                                   :db-name db-name
@@ -180,16 +175,14 @@
                   (format nil "~%~%")
                   (alexandria:read-file-into-string
                    (merge-pathnames mysql-dir "./teno-ddl.sql"))))
-      (cl-dbi:do-sql (connection-impl conn) sql))))
+      (myqlo:query (connection-impl conn) sql))))
 
 ;;;
                
 (defmethod teno.db.rdb:memo-select ((conn connection))
   (mapcar
    (alexandria:compose
-    (alexandria:curry #'teno.db.rdb::parse-memo conn)
-    (lambda (plist)
-      (mapcar #'cdr (alexandria:plist-alist plist))))
+    (alexandria:curry #'teno.db.rdb::parse-memo conn))
    (execute conn
             "SELECT memo_id, created_on FROM memos ORDER BY created_on DESC LIMIT 0, 50"
             nil)))
