@@ -7,70 +7,27 @@
 
 (defvar *service* nil)
 
-(defgeneric to-jsown (x))
-
-(defmethod to-jsown ((xs list))
-  (mapcar #'to-jsown xs))
-
-(defmethod to-jsown ((memo teno:memo))
-  (jsown:new-js
-    ("text" (teno:memo-text memo))))
-
 ;;;
 
-(defclass websocket-gui (teno:gui)
-  ((ws :initarg :ws
-       :reader ws)))
-
-(defun msg-draw-memos (memos)
-  (jsown:to-json
-   (jsown:new-js
-     ("op" "draw_memos")
-     ("memos" (to-jsown memos)))))
-
-(defun msg-clear-input ()
-  (jsown:to-json
-   (jsown:new-js
-     ("op" "clear_input"))))
-
-(defun gui-send-msg (gui msg)
-  (websocket-driver:send (ws gui) msg))
-
-(defmethod teno:gui-draw-memos ((gui websocket-gui) (memos list))
-  (gui-send-msg gui (msg-draw-memos memos)))
-
-(defmethod teno:gui-clear-input ((gui websocket-gui))
-  (gui-send-msg gui (msg-clear-input)))
+(defun make-ws-gui (ws)
+  (make-instance 'teno.gui.json:gui
+   :send-fn (lambda (msg) (websocket-driver:send ws msg))))
 
 (defun make-service (ws)
-  (let ((gui (make-instance 'websocket-gui :ws ws))
-        (store (make-instance 'teno::easy-store)))
-    (teno:make-service
-     :gui gui
-     :store store)))
-
-
-(defun json-op (json)
-  (let ((op-string (jsown:val-safe json "op")))
-    (when op-string
-      (alexandria:make-keyword
-       (string-upcase op-string)))))
-
-(defun json-arg (json key)
-  (let ((args-json (jsown:val-safe json "args")))
-    (when args-json
-      (jsown:val-safe args-json key))))
+  (teno:make-service
+   :gui (make-ws-gui ws)
+   :store (make-instance 'teno.store.in-memory:store)))
 
 (defun handle-message (service msg)
-  (let ((json (jsown:parse msg)))
-    (case (json-op json)
+  (let ((json (teno.gui.json:parse msg)))
+    (case (teno.gui.json:op json)
       (:list_memos
        (teno:service-list-memos
         service))
       (:add_memo
        (teno:service-add-memo
         service
-        (json-arg json "text")))
+        (teno.gui.json:arg json "text")))
       (t
        (format t "Unknown msg: ~A" msg)))))
 

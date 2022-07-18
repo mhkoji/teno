@@ -4,7 +4,7 @@
            :memo-text
            :store
            :store-list-memos
-           :store-save-memos
+           :store-save-memo
            :service
            :service-list-memos
            :service-add-memo
@@ -32,7 +32,6 @@
 
 (defgeneric gui-draw-memos (gui memos))
 
-
 (defgeneric gui-clear-input (gui))
 
 ;;;
@@ -50,17 +49,7 @@
              (string/= text ""))
     (let ((memo (make-memo :created-at "TODO" :text text)))
       (store-save-memo (service-store service) memo))
-    (let ((gui (service-gui service)))
-      (gui-clear-input gui)
-      (gui-draw-memos gui (store-list-memos (service-store service))))))
-
-;;;
-
-(defclass easy-store (store)
-  ((memos :initform nil)))
-
-(defmethod store-list-memos ((store easy-store))
-  (slot-value store 'memos))
-
-(defmethod store-save-memo ((store easy-store) (memo memo))
-  (push memo (slot-value store 'memos)))
+    (let ((memos (store-list-memos (service-store service))))
+      (let ((gui (service-gui service)))
+        (gui-clear-input gui)
+        (gui-draw-memos gui memos)))))
