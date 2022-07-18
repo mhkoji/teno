@@ -10,7 +10,8 @@
            :service-add-memo
            :make-service
            :gui
-           :gui-draw-memos))
+           :gui-draw-memos
+           :gui-clear-input))
 (in-package :teno)
 
 (defstruct memo
@@ -31,6 +32,9 @@
 
 (defgeneric gui-draw-memos (gui memos))
 
+
+(defgeneric gui-clear-input (gui))
+
 ;;;
 
 (defstruct service
@@ -42,9 +46,13 @@
     (gui-draw-memos (service-gui service) memos)))
 
 (defun service-add-memo (service text)
-  (let ((memo (make-memo :created-at "TODO" :text text)))
-    (store-save-memo (service-store service) memo))
-  (service-list-memos service))
+  (when (and (stringp text)
+             (string/= text ""))
+    (let ((memo (make-memo :created-at "TODO" :text text)))
+      (store-save-memo (service-store service) memo))
+    (let ((gui (service-gui service)))
+      (gui-clear-input gui)
+      (gui-draw-memos gui (store-list-memos (service-store service))))))
 
 ;;;
 

@@ -28,11 +28,19 @@
      ("op" "draw_memos")
      ("memos" (to-jsown memos)))))
 
+(defun msg-clear-input ()
+  (jsown:to-json
+   (jsown:new-js
+     ("op" "clear_input"))))
+
 (defun gui-send-msg (gui msg)
   (websocket-driver:send (ws gui) msg))
 
 (defmethod teno:gui-draw-memos ((gui websocket-gui) (memos list))
   (gui-send-msg gui (msg-draw-memos memos)))
+
+(defmethod teno:gui-clear-input ((gui websocket-gui))
+  (gui-send-msg gui (msg-clear-input)))
 
 (defun make-service (ws)
   (let ((gui (make-instance 'websocket-gui :ws ws))
