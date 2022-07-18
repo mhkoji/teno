@@ -5,6 +5,8 @@
 
 (defvar *handler* nil)
 
+(defvar *service* nil)
+
 (defgeneric to-jsown (x))
 
 (defmethod to-jsown ((xs list))
@@ -33,8 +35,11 @@
   (gui-send-msg gui (msg-draw-memos memos)))
 
 (defun make-service (ws)
-  (let ((gui (make-instance 'websocket-gui :ws ws)))
-    (teno:make-service :gui gui)))
+  (let ((gui (make-instance 'websocket-gui :ws ws))
+        (store (make-instance 'teno::easy-store)))
+    (teno:make-service
+     :gui gui
+     :store store)))
 
 
 (defun json-op (json)
@@ -43,17 +48,28 @@
       (alexandria:make-keyword
        (string-upcase op-string)))))
 
+(defun json-arg (json key)
+  (let ((args-json (jsown:val-safe json "args")))
+    (when args-json
+      (jsown:val-safe args-json key))))
+
 (defun handle-message (service msg)
   (let ((json (jsown:parse msg)))
     (case (json-op json)
       (:list_memos
-       (teno:service-list-memos service))
+       (teno:service-list-memos
+        service))
+      (:add_memo
+       (teno:service-add-memo
+        service
+        (json-arg json "text")))
       (t
        (format t "Unknown msg: ~A" msg)))))
 
 (defun ws-server (env)
   (let* ((ws (websocket-driver:make-server env))
          (service (make-service ws)))
+    (setq *service* service)
     (websocket-driver:on :message ws
                          (lambda (msg)
                            (handle-message service msg)))
